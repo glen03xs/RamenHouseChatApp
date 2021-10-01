@@ -3,7 +3,9 @@ const Order = require("./assignment1Order");
 const OrderState = Object.freeze({
     WELCOMING:   Symbol("welcoming"),
     SIZE:   Symbol("size"),
-    TOPPINGS:   Symbol("toppings"),
+    TYPE:   Symbol("type"),
+    APPETIZER:   Symbol("appetizer"),
+    DESSERT:   Symbol("dessert"),
     DRINKS:  Symbol("drinks")
 });
 
@@ -12,9 +14,11 @@ module.exports = class ShwarmaOrder extends Order{
         super();
         this.stateCur = OrderState.WELCOMING;
         this.sSize = "";
-        this.sToppings = "";
+        this.sType = "";
+        this.sAppetizer = "";
+        this.sDessert = "";
         this.sDrinks = "";
-        this.sItem = "shawarama";
+        this.sItem = "ramen";
     }
     handleInput(sInput){
         let aReturn = [];
@@ -25,13 +29,27 @@ module.exports = class ShwarmaOrder extends Order{
                 aReturn.push("What size would you like?");
                 break;
             case OrderState.SIZE:
-                this.stateCur = OrderState.TOPPINGS
+                this.stateCur = OrderState.TYPE
                 this.sSize = sInput;
-                aReturn.push("What toppings would you like?");
+                aReturn.push("What type of Ramen would you like? (Shio | Shoyu | Miso | Tonkotsu)");
                 break;
-            case OrderState.TOPPINGS:
+            case OrderState.TYPE:
+                this.stateCur = OrderState.APPETIZER
+                this.sType = sInput;
+                aReturn.push("Would you like appetizer? (Edamame | Agedashi Tofu | Chicken Karaage | Shrimp Karaage | Ebi Shumai)");
+                break;
+            case OrderState.APPETIZER:
+                this.stateCur = OrderState.DESSERT
+                aReturn.push("How about Dessert? (Almond Tofu | Chocolate Cream Bun)");
+                if(sInput.toLowerCase() != "no"){
+                    this.sAppetizer = sInput;
+                }
+                break;
+            case OrderState.DESSERT:
                 this.stateCur = OrderState.DRINKS
-                this.sToppings = sInput;
+                if(sInput.toLowerCase() != "no"){
+                    this.sDessert = sInput;
+                }
                 aReturn.push("Would you like drinks with that?");
                 break;
             case OrderState.DRINKS:
@@ -39,10 +57,19 @@ module.exports = class ShwarmaOrder extends Order{
                 if(sInput.toLowerCase() != "no"){
                     this.sDrinks = sInput;
                 }
-                aReturn.push("Thank-you for your order of");
-                aReturn.push(`${this.sSize} ${this.sItem} with ${this.sToppings}`);
-                if(this.sDrinks){
-                    aReturn.push(this.sDrinks);
+                aReturn.push("Thank you for your order of");
+                aReturn.push(`${this.sSize} ${this.sType} ${this.sItem}`);
+                
+                if ( this.sAppetizer && this.sDessert) {
+                    aReturn.push(`with Appetizer of ${this.sAppetizer} and ${this.sDessert} Dessert`);
+                } else if (this.sAppetizer) {
+                    aReturn.push(`and Appetizer of ${this.sAppetizer}`);
+                } else if (this.sDessert) {
+                    aReturn.push(`and Dessert of ${this.sDessert}`);
+                } 
+                
+                if (this.sDrinks){
+                    aReturn.push(`plus ${this.sDrinks}`);
                 }
                 let d = new Date(); 
                 d.setMinutes(d.getMinutes() + 20);
